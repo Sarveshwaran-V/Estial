@@ -34,6 +34,10 @@ document.getElementById('wardrobeImage').addEventListener('change', function(eve
         imagePreview.src = e.target.result;
         imagePreview.style.display = 'block';
 
+        const wardrobeItem = {
+            description: 'Uploaded wardrobe item' // Placeholder description
+        };
+
         const userProfile = {
             bodyType: document.getElementById('bodyType').value,
             height: document.getElementById('height').value,
@@ -45,17 +49,10 @@ document.getElementById('wardrobeImage').addEventListener('change', function(eve
             budget: document.getElementById('budget').value
         };
 
-        analyzeImageWithGemini(e.target.result)
-            .then(outfitDescription => {
-                const wardrobeItem = {
-                    description: outfitDescription
-                };
-
-                getFashionAdvice(userProfile, wardrobeItem)
-                    .then(response => {
-                        console.log('Fashion Advice:', response);
-                        document.getElementById('fashionAdvice').innerText = response;
-                    });
+        getFashionAdvice(userProfile, wardrobeItem)
+            .then(response => {
+                console.log('Fashion Advice:', response);
+                document.getElementById('fashionAdvice').innerText = response;
             });
     }
 
@@ -74,33 +71,3 @@ async function getFashionAdvice(userProfile, wardrobeItem) {
     const response = await puter.ai.chat(prompt);
     return response;
 }
-
-        const geminiApiKey = "AIzaSyC-yGk4HzEqSMiMGIxLA-7SK1Ei1-3P2yE";
-
-        async function analyzeImageWithGemini(imageBlob) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${geminiApiKey}`;
-            const data = {
-                contents: [{
-                    parts: [{
-                        inlineData: {
-                            mimeType: "image/jpeg",
-                            data: imageBlob.split(',')[1]
-                        }
-                    }, {
-                        text: "Describe the outfit in the image."
-                    }]
-                }]
-            };
-
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(data)
-            });
-
-            const result = await response.json();
-            console.log(result);
-            return result.candidates[0].content.parts[0].text;
-        }
