@@ -71,3 +71,41 @@ async function getFashionAdvice(userProfile, wardrobeItem) {
     const response = await puter.ai.chat(prompt);
     return response;
 }
+
+document.getElementById('getFashionAdviceButton').addEventListener('click', function() {
+    const userProfile = {
+        bodyType: document.getElementById('bodyType').value,
+        height: document.getElementById('height').value,
+        weight: document.getElementById('weight').value,
+        skinTone: document.getElementById('skinTone').value,
+        hairColor: document.getElementById('hairColor').value,
+        eyeColor: document.getElementById('eyeColor').value,
+        stylePreferences: document.getElementById('stylePreferences').value.split(','),
+        budget: document.getElementById('budget').value
+    };
+
+    const fileInput = document.getElementById('wardrobeImage');
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            analyzeImageWithGemini(e.target.result)
+                .then(outfitDescription => {
+                    const wardrobeItem = {
+                        description: outfitDescription
+                    };
+
+                    getFashionAdvice(userProfile, wardrobeItem)
+                        .then(response => {
+                            console.log('Fashion Advice:', response);
+                            document.getElementById('fashionAdvice').innerText = response;
+                        });
+                });
+        }
+
+        reader.readAsDataURL(file);
+    } else {
+        alert('Please upload a wardrobe item image.');
+    }
+});
