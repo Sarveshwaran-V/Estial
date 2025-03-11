@@ -17,9 +17,12 @@ def analyze_image(image_path, api_key):
         ]
 
         response = model.generate_content(contents)
+        print(f"Gemini API response: {response.text}")
         return response.text
     except Exception as e:
-        return f"Error: {str(e)}"
+        error_message = f"Error: {str(e)}"
+        print(error_message)
+        return error_message
 
 if __name__ == "__main__":
     image_path = "temp_image.jpg"
