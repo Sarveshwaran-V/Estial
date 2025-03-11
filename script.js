@@ -72,6 +72,42 @@ async function getFashionAdvice(userProfile, wardrobeItem) {
     return response;
 }
 
+async function analyzeImageWithGemini(imageData) {
+    // Save the image data to a temporary file
+    const imagePath = "C:/Users/2022PECML156/Desktop/Estial/temp_image.jpg";
+    const base64Data = imageData.replace(/^data:image\/(png|jpeg|jpg);base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+    fs.writeFileSync(imagePath, buffer);
+
+    // Execute the Python script to analyze the image
+    const pythonScriptPath = "C:/Users/2022PECML156/Desktop/Estial/analyze_image.py";
+    const command = `python "${pythonScriptPath}"`;
+
+    try {
+        const result = await new Promise((resolve, reject) => {
+            exec(command, { env: { ...process.env, GEMINI_API_KEY: "AIzaSyC-yGk4HzEqSMiMGIxLA-7SK1Ei1-3P2yE" } }, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`Error executing command: ${error}`);
+                    reject(error);
+                    return;
+                }
+                resolve(stdout);
+            });
+        });
+
+        // Read the outfit description from the output file
+        const descriptionPath = "C:/Users/2022PECML156/Desktop/Estial/outfit_description.txt";
+        const outfitDescription = fs.readFileSync(descriptionPath, 'utf-8');
+        return outfitDescription;
+    } catch (error) {
+        console.error(`Error analyzing image: ${error}`);
+        return "Error analyzing image.";
+    }
+}
+
+const fs = require('fs');
+const { exec } = require('child_process');
+
 document.getElementById('getFashionAdviceButton').addEventListener('click', function() {
     const userProfile = {
         bodyType: document.getElementById('bodyType').value,
